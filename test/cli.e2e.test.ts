@@ -843,6 +843,18 @@ describe('loopany doctor', () => {
     expect(r.code).not.toBe(0);
     expect(r.stdout.toLowerCase()).toContain('dangling');
   });
+
+  test('ignores non-directory entries under artifacts when building doctor index', async () => {
+    const ws = await init();
+    await runCli(ws, 'artifact', 'create', '--kind', 'person', '--slug', 'self', '--name', 'X');
+    await runCli(ws, 'artifact', 'create', '--kind', 'mission', '--slug', 'g', '--title', 't', '--status', 'active');
+    writeFileSync(join(ws, 'artifacts', '.DS_Store'), 'finder');
+
+    const r = await runCli(ws, 'doctor', '--format', 'json');
+    expect(r.code).toBe(0);
+    const obj = JSON.parse(r.stdout);
+    expect(obj.ok).toBe(true);
+  });
 });
 
 describe('loopany artifact set', () => {

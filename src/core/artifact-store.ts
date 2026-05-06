@@ -155,9 +155,10 @@ export class ArtifactStore {
       if (def.storage === 'flat') {
         out.push(...(await this.readDirArtifacts(def, dir)));
       } else {
-        const months = await readdir(dir);
+        const months = await readdir(dir, { withFileTypes: true });
         for (const month of months) {
-          const monthDir = join(dir, month);
+          if (!month.isDirectory()) continue;
+          const monthDir = join(dir, month.name);
           out.push(...(await this.readDirArtifacts(def, monthDir)));
         }
       }
@@ -289,4 +290,3 @@ function formatTs(d: Date): string {
   const ss = String(d.getUTCSeconds()).padStart(2, '0');
   return `${yyyy}${mm}${dd}-${hh}${mi}${ss}`;
 }
-
