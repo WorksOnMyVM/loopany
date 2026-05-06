@@ -286,4 +286,15 @@ describe('ArtifactStore.listAll', () => {
     const kinds = all.map((a) => a.kind).sort();
     expect(kinds).toEqual(['person', 'task', 'task']);
   });
+
+  test('ignores non-directory entries under artifacts for date-bucketed kinds', async () => {
+    const root = newWorkspace();
+    const reg = await setupRegistry();
+    const store = new ArtifactStore(root, reg);
+
+    writeFileSync(join(root, 'artifacts', '.DS_Store'), 'finder');
+    await store.create('task', { title: 'a', status: 'todo' });
+
+    await expect(store.listAll()).resolves.toHaveLength(1);
+  });
 });
